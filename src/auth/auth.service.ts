@@ -10,7 +10,6 @@ import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/auth.dto';
 import { JwtService } from '@nestjs/jwt';
 import type { Response, Request } from 'express';
-import { User } from 'src/user/entities/user.entites';
 
 @Injectable()
 export class AuthService {
@@ -67,5 +66,10 @@ export class AuthService {
     } catch (e) {
       throw new UnauthorizedException();
     }
+  }
+
+  logout(response: Response) {
+    response.clearCookie('jwt');
+    return { message: 'Logout successful' };
   }
 }

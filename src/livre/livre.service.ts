@@ -1,11 +1,17 @@
 import { Auteur } from 'src/auteur/entities/auteur.entity';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Livre } from './entities/book.entities';
 import { Repository } from 'typeorm';
 import { CreateLivreDto } from './dto/create.livre.dto';
 import { UpdateLivreDto } from './dto/update.livre.dto';
 import { Category } from 'src/category/entites/category.entites';
+import type { Request } from 'express';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class LivreService {
@@ -18,6 +24,7 @@ export class LivreService {
 
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
+    private jwtService: JwtService,
   ) {}
 
   // Creer unn livre
@@ -50,10 +57,21 @@ export class LivreService {
   }
 
   // Get books
-  findAll(): Promise<Livre[]> {
-    return this.livreRepository.find({
-      relations: ['auteur', 'category', 'loans'],
-    });
+  async findAll(request: Request): Promise<Livre[]> {
+    try {
+      const cookie = request.cookies['jwt'];
+      const data = await this.jwtService.verifyAsync(cookie);
+
+      if (!data) {
+        throw new UnauthorizedException();
+      }
+
+      return this.livreRepository.find({
+        relations: ['auteur', 'category', 'loans'],
+      });
+    } catch (e) {
+      throw new UnauthorizedException();
+    }
   }
 
   // Get find one

@@ -6,10 +6,12 @@ import {
   Param,
   Post,
   Put,
+  Req,
 } from '@nestjs/common';
 import { LivreService } from './livre.service';
 import { UpdateLivreDto } from './dto/update.livre.dto';
 import { CreateLivreDto } from './dto/create.livre.dto';
+import type { Request } from 'express';
 
 @Controller('livres')
 export class LivreController {
@@ -21,8 +23,8 @@ export class LivreController {
   }
 
   @Get()
-  findAll() {
-    return this.livreService.findAll();
+  async findAll(@Req() request: Request) {
+    return this.livreService.findAll(request);
   }
 
   @Get(':id')
